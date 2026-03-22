@@ -5,6 +5,10 @@ import createNextIntlPlugin from 'next-intl/plugin'
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+  // Désactiver le type check au build (géré par le CI/IDE, pas le build prod)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Optimisation images : Supabase Storage comme source externe
   images: {
     remotePatterns: [
