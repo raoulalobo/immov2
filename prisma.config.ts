@@ -13,8 +13,4 @@ export default defineConfig({
   datasource: {
     url: process.env.DIRECT_URL!,
   },
-  // URL spécifique pour les migrations
-  migrate: {
-    url: process.env.DIRECT_URL!,
-  },
 })
