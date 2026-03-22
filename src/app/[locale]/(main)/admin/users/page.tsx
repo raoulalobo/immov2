@@ -80,7 +80,7 @@ export default async function AdminUsersPage() {
 
             {/* Corps du tableau — une ligne par utilisateur */}
             <tbody className="divide-y divide-[#E5E0D8]">
-              {users.map((user) => (
+              {users.map((user: typeof users[number]) => (
                 <tr key={user.id} className="hover:bg-[#FAF7F2]">
                   {/* Nom de l'utilisateur */}
                   <td className="px-4 py-3 font-medium text-[#374151]">

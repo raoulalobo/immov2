@@ -87,7 +87,7 @@ export default async function HomePage() {
         {listings.length > 0 ? (
           /* Grille d'annonces réelles depuis la base de données */
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => (
+            {listings.map((listing: typeof listings[number]) => (
               <ListingCard
                 key={listing.id}
                 id={listing.id}

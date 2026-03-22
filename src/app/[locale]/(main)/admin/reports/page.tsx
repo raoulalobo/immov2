@@ -83,7 +83,7 @@ export default async function ReportsPage() {
 
             {/* Corps du tableau — une ligne par signalement */}
             <tbody className="divide-y divide-[#E5E0D8]">
-              {reports.map((report) => (
+              {reports.map((report: typeof reports[number]) => (
                 <tr key={report.id} className="hover:bg-[#FAF7F2]">
                   {/* Titre de l'annonce signalée */}
                   <td className="max-w-[200px] truncate px-4 py-3 font-medium text-[#374151]">

@@ -70,7 +70,7 @@ export default async function AdminListingsPage() {
 
             {/* Corps du tableau — une ligne par annonce */}
             <tbody className="divide-y divide-[#E5E0D8]">
-              {listings.map((listing) => (
+              {listings.map((listing: typeof listings[number]) => (
                 <tr key={listing.id} className="hover:bg-[#FAF7F2]">
                   {/* Titre de l'annonce (tronqué si trop long) */}
                   <td className="max-w-[200px] truncate px-4 py-3 font-medium text-[#374151]">

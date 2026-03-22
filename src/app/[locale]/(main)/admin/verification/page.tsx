@@ -62,7 +62,7 @@ export default async function VerificationPage() {
       ) : (
         /* --- Grille de cartes (plutôt qu'un tableau pour afficher les images) --- */
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          {requests.map((req) => (
+          {requests.map((req: typeof requests[number]) => (
             <div
               key={req.id}
               className="rounded-xl border border-[#E5E0D8] bg-white p-5 transition-shadow hover:shadow-sm"
