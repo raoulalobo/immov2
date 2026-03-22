@@ -1,0 +1,94 @@
+{
+  "yaounde": {
+    "name": "Yaoundé",
+    "lat": 3.848,
+    "lng": 11.502,
+    "quarters": [
+      "Bastos", "Mvan", "Nlongkak", "Essos", "Biyem-Assi",
+      "Mimboman", "Nkolbisson", "Ekounou", "Emana", "Simbock",
+      "Ngousso", "Omnisports", "Mfandena", "Etoudi", "Mokolo"
+    ]
+  },
+  "douala": {
+    "name": "Douala",
+    "lat": 4.051,
+    "lng": 9.768,
+    "quarters": [
+      "Bonamoussadi", "Akwa", "Deido", "Bonapriso", "Makepe",
+      "Logbessou", "Ndogbong", "Kotto", "Bonamikano", "Bali",
+      "New Bell", "Bonaberi", "Logpom", "Ndokotti", "Village"
+    ]
+  },
+  "bafoussam": {
+    "name": "Bafoussam",
+    "lat": 5.474,
+    "lng": 10.418,
+    "quarters": [
+      "Tamdja", "Djeleng", "Bamougoum", "Banengo", "Kamkop",
+      "Tougang", "Famla", "Ndiangdam", "Kouogouo", "Djemoun"
+    ]
+  },
+  "garoua": {
+    "name": "Garoua",
+    "lat": 9.301,
+    "lng": 13.392,
+    "quarters": [
+      "Roumdé-Adjia", "Marouaré", "Poumpoumré", "Bibémiré",
+      "Souari", "Lopéré", "Djamboutou", "Ouro-Hourso", "Plateau"
+    ]
+  },
+  "maroua": {
+    "name": "Maroua",
+    "lat": 10.591,
+    "lng": 14.316,
+    "quarters": [
+      "Domayo", "Pitoaré", "Zokok", "Dougoi", "Kakataré",
+      "Ouro-Tchédé", "Palar", "Founangué", "Kodek", "Makabaye"
+    ]
+  },
+  "bamenda": {
+    "name": "Bamenda",
+    "lat": 5.959,
+    "lng": 10.146,
+    "quarters": [
+      "Up Station", "Commercial Avenue", "Nkwen", "Mile 4",
+      "Ntarinkon", "Old Town", "Bayelle", "Azire", "Sisia", "Atuakom"
+    ]
+  },
+  "ngaoundere": {
+    "name": "Ngaoundéré",
+    "lat": 7.327,
+    "lng": 13.584,
+    "quarters": [
+      "Joli-Soir", "Dang", "Bini", "Sabongari", "Madagascar",
+      "Onaref", "Baladji", "Manwi", "Mbideng"
+    ]
+  },
+  "bertoua": {
+    "name": "Bertoua",
+    "lat": 4.577,
+    "lng": 13.684,
+    "quarters": [
+      "Haoussa", "Mokolo", "Nkolbikon", "Mandjou",
+      "Ndem", "Mission", "Yadémé", "Tigaza"
+    ]
+  },
+  "ebolowa": {
+    "name": "Ebolowa",
+    "lat": 2.9,
+    "lng": 11.15,
+    "quarters": [
+      "Angalé", "Mekalat", "Nko'ovos", "New-Bell",
+      "Abang", "Nkol-Obok", "Mvam-Essakoé", "Ebolowa-Si"
+    ]
+  },
+  "kribi": {
+    "name": "Kribi",
+    "lat": 2.94,
+    "lng": 9.91,
+    "quarters": [
+      "Centre-ville", "Mpangou", "Dombé", "Talla",
+      "Grand Batanga", "Londji", "Ebodjé", "Lolabé"
+    ]
+  }
+}

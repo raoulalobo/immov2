@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/*
+ * Design system ImmoV2 — tokens CSS (source : DESIGN.md)
+ * Palette terre/forêt + warm grays
+ */
+
+:root {
+  /* Couleurs primaires */
+  --primary: #2D6A4F;
+  --primary-light: #40916C;
+  --primary-dark: #1B4332;
+
+  /* Couleurs secondaires (ocre/terre de sienne) */
+  --secondary: #D4A373;
+  --secondary-light: #E6C9A8;
+  --secondary-dark: #B08050;
+
+  /* Surfaces */
+  --background: #FAF7F2;
+  --background-elevated: #FFFFFF;
+  --background-subtle: #F0EBE3;
+
+  /* Bordures */
+  --border: #E8E0D5;
+
+  /* Texte */
+  --foreground: #2C2418;
+  --foreground-secondary: #6B5E50;
+  --foreground-muted: #B5A898;
+
+  /* Sémantique */
+  --success: #2D6A4F;
+  --warning: #E9C46A;
+  --error: #E63946;
+  --info: #457B9D;
+
+  /* WhatsApp */
+  --whatsapp: #25D366;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-secondary-light: var(--secondary-light);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-background: var(--background);
+  --color-background-elevated: var(--background-elevated);
+  --color-background-subtle: var(--background-subtle);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-whatsapp: var(--whatsapp);
+  --font-display: 'General Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}

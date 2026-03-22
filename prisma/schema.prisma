@@ -1,0 +1,247 @@
+// Schéma Prisma — source unique pour la base de données ImmoV2
+// Inclut les tables Better Auth (user, session, account, verification)
+// et les tables métier (listing, photo, report, etc.)
+//
+// Commandes utiles :
+//   bunx prisma db push     → pousser le schéma vers Supabase
+//   bunx prisma generate    → générer le client Prisma
+//   bunx prisma studio      → interface visuelle pour la DB
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// TABLES BETTER AUTH (gérées par le plugin @better-auth/prisma)
+// Ces tables sont requises par Better Auth pour l'authentification.
+// Les champs custom (role, isVendor, etc.) sont ajoutés ici.
+// ============================================================
+
+/// Utilisateur — vendeur, acheteur ou admin.
+/// Tout utilisateur peut être vendeur ET acheteur (is_vendor=true dès la 1ère annonce).
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String
+  phone         String?
+  image         String?
+  // --- Champs custom ImmoV2 ---
+  role          String    @default("user")       // "user" | "admin"
+  isVendor      Boolean   @default(false)        // true dès la 1ère annonce
+  isVerified    Boolean   @default(false)        // badge "Vendeur vérifié"
+  status        String    @default("active")     // "active" | "suspended" | "deleted"
+  deletedAt     DateTime?                        // date du soft delete (purge après 30j)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  sessions              Session[]
+  accounts              Account[]
+  listings              Listing[]
+  reports               Report[]                 // signalements envoyés
+  verificationRequests  VerificationRequest[]
+  savedSearches         SavedSearch[]
+  contactEvents         ContactEvent[]           // clics "Contacter" effectués
+  favorites             Favorite[]               // annonces mises en favori
+
+  @@map("user")
+}
+
+/// Session d'authentification Better Auth.
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+/// Compte lié (email/password, OAuth).
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+/// Token de vérification email Better Auth.
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ============================================================
+// TABLES MÉTIER IMMOV2
+// ============================================================
+
+/// Annonce de terrain — cœur de la marketplace.
+/// Cycle de vie : draft → active → sold | expired | suspended
+model Listing {
+  id           String   @id @default(cuid())
+  vendorId     String
+  title        String
+  description  String?
+  priceFcfa    BigInt                            // prix en FCFA (BigInt pour les gros montants)
+  surfaceM2    Decimal                           // surface en m²
+  terrainType  String                            // "residential" | "commercial" | "agricultural"
+  city         String                            // clé vers cities.json
+  quarter      String?                           // quartier, texte libre si absent du référentiel
+  latitude     Float?                            // latitude GPS du terrain (ex: 4.051)
+  longitude    Float?                            // longitude GPS du terrain (ex: 9.768)
+  status       String   @default("draft")        // "draft" | "active" | "sold" | "expired" | "suspended"
+  contactCount Int      @default(0)              // compteur brut de clics "Contacter"
+  videoPath    String?                           // chemin Supabase Storage pour la vidéo 30s
+  expiresAt    DateTime?                         // created_at + 90 jours
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  vendor        User           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  photos        ListingPhoto[]
+  reports       Report[]
+  contactEvents ContactEvent[]
+  favorites     Favorite[]
+
+  // Index composites pour la recherche performante (décision eng review #12)
+  @@index([status, city, terrainType, priceFcfa], name: "idx_listing_search")
+  @@index([vendorId, status], name: "idx_listing_vendor")
+  @@index([expiresAt], name: "idx_listing_expiry")
+
+  @@map("listing")
+}
+
+/// Photo d'annonce — stockée dans Supabase Storage.
+/// Upload via signed URL (compression côté client, décision eng review #1).
+model ListingPhoto {
+  id          String   @id @default(cuid())
+  listingId   String
+  storagePath String                             // chemin dans Supabase Storage
+  position    Int      @default(0)               // ordre d'affichage (0 = photo principale)
+  createdAt   DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_photo")
+}
+
+/// Événement de clic "Contacter sur WhatsApp".
+/// Utilisé pour le comptage et l'email quotidien récapitulatif.
+/// Pattern fire-and-forget côté client (décision eng review #14).
+model ContactEvent {
+  id        String   @id @default(cuid())
+  listingId String
+  userId    String?                              // null si utilisateur non connecté
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("contact_event")
+}
+
+/// Signalement d'annonce — tout utilisateur inscrit peut signaler.
+/// Règle : 3 signalements pending = suspension automatique de l'annonce.
+model Report {
+  id         String   @id @default(cuid())
+  listingId  String
+  reporterId String
+  reason     String                              // raison du signalement (texte libre)
+  status     String   @default("pending")        // "pending" | "confirmed" | "dismissed"
+  adminNote  String?                             // note de l'admin après revue
+  createdAt  DateTime @default(now())
+
+  listing  Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporter User    @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("report")
+}
+
+/// Demande de vérification vendeur.
+/// Workflow : vendeur soumet → admin revoit (SLA 48h) → approuvé/rejeté.
+/// Si approuvé → badge "Vendeur vérifié" sur toutes les annonces.
+model VerificationRequest {
+  id              String    @id @default(cuid())
+  vendorId        String
+  documentType    String                         // "cni" | "passport"
+  documentNumber  String
+  rectoPath       String                         // chemin Supabase Storage (recto du document)
+  versoPath       String                         // chemin Supabase Storage (verso du document)
+  status          String    @default("pending")  // "pending" | "approved" | "rejected"
+  rejectionReason String?                        // motif de rejet
+  reviewedAt      DateTime?                      // date de la revue admin
+  createdAt       DateTime  @default(now())
+
+  vendor User @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@map("verification_request")
+}
+
+/// Recherche sauvegardée — un acheteur sauvegarde des critères
+/// et reçoit un email quand une nouvelle annonce matche.
+/// Matchée par le cron quotidien (Vercel Cron, décision eng review #4).
+model SavedSearch {
+  id          String   @id @default(cuid())
+  userId      String
+  city        String?                            // filtre ville (optionnel)
+  quarter     String?                            // filtre quartier (optionnel)
+  terrainType String?                            // filtre type de terrain (optionnel)
+  minPrice    BigInt?                            // prix minimum en FCFA
+  maxPrice    BigInt?                            // prix maximum en FCFA
+  minSurface  Decimal?                           // surface minimum en m²
+  maxSurface  Decimal?                           // surface maximum en m²
+  lastNotifiedAt DateTime?                       // dernière notification envoyée
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_search")
+}
+
+/// Favori — un utilisateur met une annonce en favori pour la retrouver facilement.
+/// Un utilisateur ne peut mettre une annonce en favori qu'une seule fois (contrainte unique).
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Un utilisateur ne peut pas mettre la même annonce en favori deux fois
+  @@unique([userId, listingId])
+  @@index([userId], name: "idx_favorite_user")
+
+  @@map("favorite")
+}
